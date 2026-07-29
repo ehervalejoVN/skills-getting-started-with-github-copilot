@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse, FileResponse
 import os
 from pathlib import Path
+from copy import deepcopy
 
 app = FastAPI(title="Mergington High School API",
               description="API for viewing and signing up for extracurricular activities")
@@ -76,6 +77,18 @@ activities = {
         "participants": ["isabella@mergington.edu", "noah@mergington.edu"]
     }
 }
+
+# Keep an immutable copy of the initial activities for tests to restore state reliably
+_initial_activities = deepcopy(activities)
+
+
+def reset_activities_db():
+    """Reset the in-memory activities store to its initial state.
+
+    Tests should call this to avoid state leakage between tests.
+    """
+    activities.clear()
+    activities.update(deepcopy(_initial_activities))
 
 
 @app.get("/")
